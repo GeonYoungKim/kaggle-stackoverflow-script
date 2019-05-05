@@ -7,10 +7,10 @@ $HIVE -e "
 USE etl_dev
 ;
 
-DROP TABLE IF EXISTS answer_recent
+DROP TABLE IF EXISTS es_answer_recent
 ;
 
-CREATE TABLE answer_recent
+CREATE TABLE es_answer_recent
 AS
 SELECT
     new.answer_id as answer_id,
@@ -36,10 +36,7 @@ LEFT OUTER JOIN answer_comment_link_set_old old ON(new.answer_id=old.answer_id)
 WHERE old.answer_id IS NULL
     OR
     (
-      new.body != old.body OR new.tags != old.tags OR new.owner_display_name != old.owner_display_name
-      OR new.user_about_me != old.user_about_me OR new.user_age != old.user_age OR new.user_up_votes != old.user_up_votes
-      OR new.user_down_votes != old.user_down_votes OR new.user_profile_image_url != old.user_profile_image_url
-      OR new.user_website_url != old.user_website_url
+      new.body != old.body OR new.tags != old.tags
     )
     OR
     (
@@ -47,10 +44,10 @@ WHERE old.answer_id IS NULL
     )
 ;
 
-DROP TABLE IF EXISTS answer_delete
+DROP TABLE IF EXISTS es_answer_delete
 ;
 
-CREATE TABLE answer_delete
+CREATE TABLE es_answer_delete
 AS
 SELECT
     old.answer_id as answer_id
@@ -59,10 +56,10 @@ LEFT OUTER JOIN answer_comment_link_set new ON(new.answer_id=old.answer_id)
 WHERE new.answer_id IS NULL
 ;
 
-DROP TABLE IF EXISTS question_recent
+DROP TABLE IF EXISTS es_question_recent
 ;
 
-CREATE TABLE question_recent
+CREATE TABLE es_question_recent
 AS
 SELECT
     new.question_id as question_id,
@@ -91,11 +88,7 @@ LEFT OUTER JOIN question_comment_link_set_old old ON(new.question_id=old.questio
 WHERE old.question_id IS NULL
     OR
     (
-      new.title != old.title OR new.body != old.body OR new.tags != old.tags 
-      OR new.owner_display_name != old.owner_display_name OR new.user_about_me != old.user_about_me 
-      OR new.user_age != old.user_age OR new.user_up_votes != old.user_up_votes
-      OR new.user_down_votes != old.user_down_votes OR new.user_profile_image_url != old.user_profile_image_url
-      OR new.user_website_url != old.user_website_url
+      new.title != old.title OR new.body != old.body OR new.tags != old.tags
     )
     OR
     (
@@ -103,16 +96,56 @@ WHERE old.question_id IS NULL
     )
 ;
 
-DROP TABLE IF EXISTS question_delete
+DROP TABLE IF EXISTS es_question_delete
 ;
 
-CREATE TABLE question_delete
+CREATE TABLE es_question_delete
 AS
 SELECT
     old.question_id as question_id
 FROM question_comment_link_set_old old
 LEFT OUTER JOIN question_comment_link_set new ON(new.question_id=old.question_id)
 WHERE new.question_id IS NULL
+;
+
+
+DROP TABLE IF EXISTS es_user_recent
+;
+
+CREATE TABLE es_user_recent
+AS
+SELECT
+    new.id as id,
+    new.display_name as display_name,
+    new.about_me as about_me,
+    new.age as age,
+    new.creation_date as creation_date,
+    new.up_votes as up_votes,
+    new.down_votes as down_votes,
+    new.profile_image_url as profile_image_url,
+    new.website_url as website_url
+FROM es_study_user new
+LEFT OUTER JOIN es_study_user_old old ON (new.id=old.id)
+WHERE old.id IS NULL
+    OR
+    (
+        new.display_name != old.display_name OR new.about_me != old.about_me
+        OR new.age != old.age OR new.up_votes != old.up_votes
+        OR new.down_votes != old.down_votes OR new.profile_image_url != old.profile_image_url
+        OR new.website_url != old.website_url
+    )
+;
+
+DROP TABLE IF EXISTS es_user_delete
+;
+
+CREATE TABLE es_user_delete
+AS
+SELECT
+    old.id as id
+FROM es_study_user_old old
+LEFT OUTER JOIN es_study_user new ON (new.id=old.id)
+WHERE new.id IS NULL
 ;
 
 DROP TABLE IF EXISTS question_comment_link_set_old
@@ -134,4 +167,15 @@ SELECT
     *
 FROM answer_comment_link_set
 ;
+
+DROP TABLE IF EXISTS es_study_user_old
+;
+
+CREATE TABLE es_study_user_old
+AS
+SELECT
+    *
+FROM es_study_user
+;
+
 " || exit $?

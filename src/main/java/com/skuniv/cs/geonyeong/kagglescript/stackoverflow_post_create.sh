@@ -26,6 +26,7 @@ DROP TABLE IF EXISTS es_study_user
 
 CREATE EXTERNAL TABLE es_study_user (
     id string,
+    display_name string,
     about_me string,
     age string,
     creation_date string,
