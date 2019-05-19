@@ -17,11 +17,11 @@ SELECT
     new.body as body,
     new.comment_count as comment_count,
     new.creation_date as creation_date,
-    new.owner_display_name as owner_display_name,
-    new.owner_user_id as owner_user_id,
     new.parent_id as parent_id,
     new.score as score,
     new.tags as tags,
+    new.owner_user_id as owner_user_id,
+    new.owner_display_name as owner_display_name,
     new.user_about_me as user_about_me,
     new.user_age as user_age,
     new.user_creation_date as user_creation_date,
@@ -36,11 +36,13 @@ LEFT OUTER JOIN answer_comment_link_set_old old ON(new.answer_id=old.answer_id)
 WHERE old.answer_id IS NULL
     OR
     (
-      new.body != old.body OR new.tags != old.tags
-    )
-    OR
-    (
+        new.body != old.body
+        OR
+        new.tags != old.tags
+        OR
         concat_ws(',',new.answer_comment_set) != concat_ws(',',old.answer_comment_set)
+        OR
+        concat_ws(',',new.answer_link_set) != concat_ws(',',old.answer_link_set)
     )
 ;
 
@@ -69,11 +71,11 @@ SELECT
     new.comment_count as comment_count,
     new.creation_date as creation_date,
     new.favorite_count as favorite_count,
-    new.owner_display_name as owner_display_name,
-    new.owner_user_id as owner_user_id,
     new.score as score,
     new.tags as tags,
     new.view_count as view_count,
+    new.owner_user_id as owner_user_id,
+    new.owner_display_name as owner_display_name,
     new.user_about_me as user_about_me,
     new.user_age as user_age,
     new.user_creation_date as user_creation_date,
@@ -88,11 +90,15 @@ LEFT OUTER JOIN question_comment_link_set_old old ON(new.question_id=old.questio
 WHERE old.question_id IS NULL
     OR
     (
-      new.title != old.title OR new.body != old.body OR new.tags != old.tags
-    )
-    OR
-    (
+        new.title != old.title
+        OR
+        new.body != old.body
+        OR
+        new.tags != old.tags
+        OR
         concat_ws(',',new.question_comment_set) != concat_ws(',',old.question_comment_set)
+        OR
+        concat_ws(',',new.question_link_set) != concat_ws(',',old.question_link_set)
     )
 ;
 
@@ -107,7 +113,6 @@ FROM question_comment_link_set_old old
 LEFT OUTER JOIN question_comment_link_set new ON(new.question_id=old.question_id)
 WHERE new.question_id IS NULL
 ;
-
 
 DROP TABLE IF EXISTS es_user_recent
 ;
