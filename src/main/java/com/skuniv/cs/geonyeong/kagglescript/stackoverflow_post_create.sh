@@ -290,68 +290,6 @@ LEFT OUTER JOIN (
         equ.question_id as question_id,
         collect_set(
             CONCAT_WS(
-                '\`',
-                ecu.comment_id,
-                ecu.text,
-                ecu.creation_date,
-                ecu.post_id,
-                ecu.user_id,
-                ecu.user_display_name,
-                ecu.score,
-                ecu.user_about_me,
-                ecu.user_age,
-                ecu.user_creation_date,
-                ecu.user_up_votes,
-                ecu.user_down_votes,
-                ecu.user_profile_image_url,
-                ecu.user_website_url
-            )
-        ) as question_comment_set,
-        collect_set(
-            CONCAT_WS(
-                '\`',
-                esl.id,
-                esl.post_id,
-                esl.related_post_id
-            )
-        ) as question_link_set
-    FROM es_question_user equ
-    LEFT OUTER JOIN es_comment_user ecu ON (equ.question_id=ecu.post_id)
-    LEFT OUTER JOIN es_study_link esl ON (equ.question_id=esl.post_id)
-    GROUP BY equ.question_id
-) question_set ON (equ.question_id=question_set.question_id)
-;
-
-CREATE TABLE question_comment_link_set
-AS
-SELECT
-    equ.question_id as question_id,
-    equ.title as title,
-    equ.body as body,
-    equ.answer_count as answer_count,
-    equ.comment_count as comment_count,
-    equ.creation_date as creation_date,
-    equ.favorite_count as favorite_count,
-    equ.owner_display_name as owner_display_name,
-    equ.owner_user_id as owner_user_id,
-    equ.score as score,
-    equ.tags as tags,
-    equ.view_count as view_count,
-    equ.user_about_me as user_about_me,
-    equ.user_age as user_age,
-    equ.user_creation_date as user_creation_date,
-    equ.user_up_votes as user_up_votes,
-    equ.user_down_votes as user_down_votes,
-    equ.user_profile_image_url as user_profile_image_url,
-    equ.user_website_url as user_website_url,
-    question_set.question_comment_set as question_comment_set,
-    question_set.question_link_set as question_link_set
-FROM es_question_user equ
-LEFT OUTER JOIN (
-    SELECT
-        equ.question_id as question_id,
-        collect_set(
-            CONCAT_WS(
                 '${DELEMETER}',
                 ecu.comment_id,
                 ecu.text,
